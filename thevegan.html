@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlantTable — Vegan Family Meal Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green-deep: #1a3a2a;
+  --green-mid: #2d6a4f;
+  --green-bright: #52b788;
+  --green-light: #b7e4c7;
+  --cream: #fdf6ec;
+  --warm-white: #fffdf9;
+  --amber: #e07b39;
+  --text-dark: #1a2e1f;
+  --text-mid: #3d5a47;
+  --text-light: #7a9b85;
+  --shadow: 0 4px 24px rgba(26,58,42,0.10);
+  --radius: 18px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text-dark); min-height: 100vh; }
+
+/* ── HERO ── */
+.hero { background: var(--green-deep); color: white; padding: 44px 22px 32px; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 320px; height: 320px; background: radial-gradient(circle, rgba(82,183,136,0.18) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 6px; background: rgba(82,183,136,0.15); border: 1px solid rgba(82,183,136,0.3); color: var(--green-light); font-size: 11px; font-weight: 600; letter-spacing: 1.3px; text-transform: uppercase; padding: 5px 13px; border-radius: 100px; margin-bottom: 16px; }
+.hero-hook { font-family: 'DM Serif Display', serif; font-size: clamp(21px, 5.5vw, 31px); line-height: 1.26; color: white; margin-bottom: 12px; max-width: 540px; }
+.hero-hook em { font-style: italic; color: var(--green-bright); }
+.hero-sub { font-size: 13.5px; color: rgba(255,255,255,0.68); max-width: 460px; line-height: 1.65; margin-bottom: 22px; }
+.badge-strip { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.82); font-size: 10.5px; font-weight: 500; padding: 4px 10px; border-radius: 100px; }
+
+/* ── LAYOUT ── */
+.container { max-width: 680px; margin: 0 auto; padding: 0 16px 110px; }
+.card { background: var(--warm-white); border-radius: var(--radius); padding: 22px 20px; margin-top: 18px; box-shadow: var(--shadow); }
+.card-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--green-deep); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.divider { height: 1px; background: #e0ede6; margin: 16px 0; }
+
+/* ── PEOPLE ── */
+.people-row { display: flex; align-items: center; gap: 14px; }
+.people-label { font-size: 14px; color: var(--text-mid); flex: 1; }
+.stepper { display: flex; align-items: center; gap: 10px; }
+.stepper button { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--green-bright); background: transparent; color: var(--green-mid); font-size: 20px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.stepper button:hover { background: var(--green-bright); color: white; }
+.stepper .count { font-size: 22px; font-weight: 600; color: var(--green-deep); min-width: 28px; text-align: center; }
+
+/* ── DAY / PLAN CHIPS ── */
+.section-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-light); margin-bottom: 9px; }
+.day-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.day-chip { padding: 8px 15px; border-radius: 100px; border: 2px solid #d9e8df; background: transparent; color: var(--text-mid); font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s; }
+.day-chip.active { background: var(--green-deep); border-color: var(--green-deep); color: white; }
+.plan-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.plan-chip { padding: 8px 18px; border-radius: 100px; border: 2px solid #d9e8df; background: transparent; color: var(--text-mid); font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s; }
+.plan-chip.active { background: var(--amber); border-color: var(--amber); color: white; }
+
+/* ── MEAL TOGGLES ── */
+.meal-toggles { display: flex; gap: 10px; }
+.meal-toggle { flex: 1; border: 2px solid #d9e8df; border-radius: 14px; padding: 14px 8px; text-align: center; cursor: pointer; transition: all .15s; background: transparent; }
+.meal-toggle .meal-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+.meal-toggle .meal-name { font-size: 13px; font-weight: 500; color: var(--text-light); }
+.meal-toggle.active { border-color: var(--green-bright); background: #e8f7ef; }
+.meal-toggle.active .meal-name { color: var(--green-deep); font-weight: 600; }
+.lunch-note { margin-top: 10px; font-size: 12px; color: var(--text-light); font-style: italic; text-align: center; }
+
+/* ── STORE ── */
+.store-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.store-btn { border: 2px solid #d9e8df; border-radius: 14px; padding: 13px 12px; cursor: pointer; background: transparent; transition: all .15s; text-align: left; }
+.store-btn .store-name { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+.store-btn .store-tier { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+.store-btn.active { border-color: var(--green-bright); background: #e8f7ef; }
+.store-btn.active .store-name { color: var(--green-deep); }
+
+/* ── WEEK PICKER ── */
+.week-row { display: flex; align-items: center; justify-content: space-between; }
+.week-label { font-size: 14px; color: var(--text-mid); }
+.week-label strong { color: var(--green-deep); }
+.week-nav { display: flex; align-items: center; gap: 10px; }
+.week-btn { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--green-bright); background: transparent; color: var(--green-mid); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.week-btn:hover { background: var(--green-bright); color: white; }
+.week-num { font-size: 18px; font-weight: 700; color: var(--green-deep); min-width: 24px; text-align: center; }
+
+/* ── TABS ── */
+.tabs { display: flex; background: white; border-radius: 14px; margin-top: 20px; overflow: hidden; box-shadow: var(--shadow); }
+.tab { flex: 1; padding: 14px 6px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-light); border: none; background: transparent; border-bottom: 3px solid transparent; transition: all .15s; }
+.tab.active { color: var(--green-deep); border-bottom-color: var(--green-bright); font-weight: 600; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── MEAL PLAN ── */
+.day-block { margin-bottom: 16px; }
+.day-header { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-light); padding: 6px 0 8px; border-bottom: 1px solid #e8f0eb; margin-bottom: 10px; }
+.meal-card { background: #f7fbf8; border: 1px solid #deeee5; border-radius: 14px; margin-bottom: 8px; overflow: hidden; cursor: pointer; transition: box-shadow .15s; }
+.meal-card:hover { box-shadow: 0 2px 12px rgba(26,58,42,0.08); }
+.meal-card-header { display: flex; align-items: center; padding: 13px 15px; gap: 10px; }
+.meal-type-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-breakfast { background: #f4a261; }
+.dot-lunch { background: #74c69d; }
+.dot-dinner { background: #2d6a4f; }
+.meal-card-info { flex: 1; min-width: 0; }
+.meal-card-type { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-light); }
+.meal-card-name { font-size: 15px; font-weight: 600; color: var(--text-dark); margin-top: 1px; }
+.meal-card-meta { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+.protein-tag { font-size: 10px; font-weight: 600; background: rgba(45,106,79,0.1); color: var(--green-mid); padding: 2px 7px; border-radius: 100px; display: inline-block; margin-top: 3px; }
+.expand-icon { color: var(--text-light); font-size: 18px; transition: transform .2s; flex-shrink: 0; }
+.meal-card.open .expand-icon { transform: rotate(180deg); }
+.recipe-panel { display: none; padding: 0 15px 15px; border-top: 1px solid #deeee5; }
+.recipe-panel.open { display: block; }
+.recipe-section-title { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-light); margin: 12px 0 7px; }
+.ingredient-list { list-style: none; }
+.ingredient-list li { font-size: 13.5px; color: var(--text-mid); padding: 4px 0; border-bottom: 1px solid #eef4f1; display: flex; justify-content: space-between; }
+.ingredient-list li:last-child { border: none; }
+.steps-list { list-style: none; counter-reset: steps; }
+.steps-list li { counter-increment: steps; font-size: 13.5px; color: var(--text-mid); padding: 5px 0 5px 28px; position: relative; border-bottom: 1px solid #eef4f1; line-height: 1.55; }
+.steps-list li:last-child { border: none; }
+.steps-list li::before { content: counter(steps); position: absolute; left: 0; top: 7px; width: 19px; height: 19px; background: var(--green-bright); color: white; border-radius: 50%; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+/* ── SHOPPING LIST ── */
+.shop-counter { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #e8f7ef; border-radius: 10px; margin-bottom: 16px; font-size: 13px; color: var(--green-mid); }
+.shop-counter strong { color: var(--green-deep); }
+.shop-reset-btn { font-size: 12px; color: var(--text-light); cursor: pointer; background: none; border: none; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
+.shop-reset-btn:hover { color: var(--amber); }
+.shop-category { margin-bottom: 18px; }
+.shop-cat-title { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-light); padding: 6px 0 8px; border-bottom: 2px solid #e0ede6; margin-bottom: 8px; }
+.shop-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f7f2; font-size: 14px; color: var(--text-dark); cursor: pointer; user-select: none; gap: 10px; transition: opacity .12s; }
+.shop-item:active { opacity: 0.65; }
+.shop-check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid #c0dac9; background: white; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; font-size: 12px; color: white; }
+.shop-item.have .shop-check { background: var(--green-bright); border-color: var(--green-bright); }
+.shop-item-name { flex: 1; transition: all .15s; }
+.shop-item.have .shop-item-name { text-decoration: line-through; color: var(--text-light); }
+.shop-item-qty { font-weight: 600; color: var(--green-mid); font-size: 13px; text-align: right; min-width: 90px; transition: all .15s; }
+.shop-item.have .shop-item-qty { color: var(--text-light); font-weight: 400; font-size: 12px; }
+.already-have-section { margin-top: 6px; }
+.already-title { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #c0c0c0; padding: 6px 0 8px; border-bottom: 2px solid #f0f0f0; margin-bottom: 8px; }
+.shop-empty { color: var(--text-light); font-style: italic; font-size: 14px; text-align: center; padding: 24px 0; }
+
+/* ── BUDGET ── */
+/* ── BUDGET INPUT CARD ── */
+.budget-input-card { background: var(--warm-white); border-radius: var(--radius); padding: 20px; margin-top: 18px; box-shadow: var(--shadow); }
+.budget-input-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.budget-input-label { font-size: 14px; color: var(--text-mid); flex: 1; }
+.budget-input-wrap { display: flex; align-items: center; border: 2px solid #d9e8df; border-radius: 12px; overflow: hidden; transition: border-color .15s; }
+.budget-input-wrap:focus-within { border-color: var(--green-bright); }
+.budget-currency { padding: 10px 12px; background: #f0f7f2; font-size: 16px; font-weight: 600; color: var(--green-mid); border-right: 1px solid #d9e8df; }
+.budget-input { border: none; outline: none; padding: 10px 12px; font-size: 18px; font-weight: 600; color: var(--green-deep); font-family: 'DM Sans', sans-serif; width: 90px; background: white; }
+.budget-input-hint { font-size: 11.5px; color: var(--text-light); font-style: italic; }
+
+/* progress bar */
+.budget-bar-wrap { margin-top: 16px; }
+.budget-bar-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-light); margin-bottom: 6px; }
+.budget-bar-labels .bar-estimate { color: var(--text-mid); font-weight: 500; }
+.budget-bar-track { height: 12px; background: #e0ede6; border-radius: 100px; overflow: hidden; }
+.budget-bar-fill { height: 100%; border-radius: 100px; transition: width .4s ease, background .3s; }
+.bar-green  { background: var(--green-bright); }
+.bar-yellow { background: #f4a261; }
+.bar-red    { background: #e05252; }
+.budget-verdict { margin-top: 10px; font-size: 14px; font-weight: 600; text-align: center; padding: 10px 14px; border-radius: 10px; }
+.verdict-green  { background: #e8f7ef; color: var(--green-mid); }
+.verdict-yellow { background: #fff3e8; color: #c05f1a; }
+.verdict-red    { background: #fde8e8; color: #b33232; }
+.verdict-none   { background: #f5f5f5; color: var(--text-light); font-weight: 400; font-style: italic; font-size: 13px; }
+
+/* ── BUDGET ESTIMATE CARD (dark) ── */
+.budget-card { background: var(--green-deep); border-radius: var(--radius); padding: 22px 20px; margin-top: 18px; color: white; }
+.budget-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: white; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.budget-context { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 16px; }
+.budget-range { font-family: 'DM Serif Display', serif; font-size: 38px; color: var(--green-bright); margin-bottom: 4px; }
+.budget-per-person { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 16px; }
+.budget-breakdown { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.budget-row { display: flex; justify-content: space-between; font-size: 13px; color: rgba(255,255,255,0.72); }
+.budget-row span:last-child { font-weight: 600; color: rgba(255,255,255,0.92); }
+.budget-disclaimer { font-size: 11.5px; color: rgba(255,255,255,0.42); line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 12px; }
+
+/* ── BUTTONS ── */
+.actions-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.btn-primary { flex: 1; background: var(--green-mid); color: white; border: none; border-radius: 100px; padding: 14px 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; min-width: 130px; }
+.btn-primary:hover { background: var(--green-deep); }
+.btn-secondary { flex: 1; background: transparent; color: var(--green-mid); border: 2px solid var(--green-bright); border-radius: 100px; padding: 14px 20px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; min-width: 130px; }
+.btn-secondary:hover { background: var(--green-bright); color: white; }
+
+/* ── STICKY BAR ── */
+.summary-bar { background: white; border-top: 1px solid #deeee5; padding: 12px 20px; position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 -4px 16px rgba(26,58,42,0.06); }
+.summary-info { font-size: 13px; color: var(--text-mid); }
+.summary-info strong { color: var(--green-deep); }
+.summary-cost { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--green-mid); }
+
+.empty-state { text-align: center; padding: 32px 20px; }
+.empty-state p { color: var(--text-light); font-style: italic; font-size: 14px; }
+
+@media print {
+  .summary-bar, .tabs, .actions-row, .week-row { display: none !important; }
+  body { background: white; }
+  .card, .budget-card { box-shadow: none; border: 1px solid #ddd; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow">🌿 PlantTable</div>
+  <div class="hero-hook">Dinner in 25 minutes.<br><em>Lunch is already done</em> —<br>it's last night's leftovers.</div>
+  <div class="hero-sub">A full week of vegan meals, a shopping list, and a budget tracker — all in one tool. Download once, use forever.</div>
+  <div class="badge-strip">
+    <div class="badge">🌳 Tree nut–free</div>
+    <div class="badge">🥜 Peanut–free</div>
+    <div class="badge">🥛 Dairy–free</div>
+    <div class="badge">🥚 Egg–free</div>
+    <div class="badge">🌱 Low soy</div>
+    <div class="badge">✅ Non-GMO</div>
+    <div class="badge">🍎 Cooked fruit safe</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- PEOPLE -->
+  <div class="card">
+    <div class="card-title">👥 Household Size</div>
+    <div class="people-row">
+      <div class="people-label">How many people eating?</div>
+      <div class="stepper">
+        <button onclick="changePeople(-1)">−</button>
+        <div class="count" id="peopleCount">2</div>
+        <button onclick="changePeople(1)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAY PICKER -->
+  <div class="card">
+    <div class="card-title">📅 Plan Duration</div>
+    <div class="section-label">Pick specific days</div>
+    <div class="day-chips">
+      <button class="day-chip" onclick="toggleDay(1)">Mon</button>
+      <button class="day-chip" onclick="toggleDay(2)">Tue</button>
+      <button class="day-chip" onclick="toggleDay(3)">Wed</button>
+      <button class="day-chip" onclick="toggleDay(4)">Thu</button>
+      <button class="day-chip" onclick="toggleDay(5)">Fri</button>
+      <button class="day-chip" onclick="toggleDay(6)">Sat</button>
+      <button class="day-chip" onclick="toggleDay(7)">Sun</button>
+    </div>
+    <div class="divider"></div>
+    <div class="section-label">Or choose a full plan</div>
+    <div class="plan-chips">
+      <button class="plan-chip" onclick="selectPlan(7)">7 Days</button>
+      <button class="plan-chip" onclick="selectPlan(14)">14 Days</button>
+      <button class="plan-chip" onclick="selectPlan(21)">21 Days</button>
+    </div>
+  </div>
+
+  <!-- MEAL TOGGLES -->
+  <div class="card">
+    <div class="card-title">🍽️ Active Meals</div>
+    <div class="meal-toggles">
+      <div class="meal-toggle active" id="toggle-breakfast" onclick="toggleMeal('breakfast')">
+        <span class="meal-icon">☀️</span>
+        <div class="meal-name">Breakfast</div>
+      </div>
+      <div class="meal-toggle active" id="toggle-lunch" onclick="toggleMeal('lunch')">
+        <span class="meal-icon">🥙</span>
+        <div class="meal-name">Lunch</div>
+      </div>
+      <div class="meal-toggle active" id="toggle-dinner" onclick="toggleMeal('dinner')">
+        <span class="meal-icon">🌙</span>
+        <div class="meal-name">Dinner</div>
+      </div>
+    </div>
+    <div class="lunch-note" id="lunchNote">💡 Lunch = last night's leftovers. Zero extra cook time.</div>
+  </div>
+
+  <!-- STORE -->
+  <div class="card">
+    <div class="card-title">🛒 Your Store</div>
+    <div class="store-grid">
+      <button class="store-btn" id="store-walmart" onclick="selectStore('walmart')">
+        <div class="store-name">Walmart</div>
+        <div class="store-tier">Budget — lowest prices</div>
+      </button>
+      <button class="store-btn" id="store-kroger" onclick="selectStore('kroger')">
+        <div class="store-name">Kroger / Safeway</div>
+        <div class="store-tier">Mid-range grocery</div>
+      </button>
+      <button class="store-btn active" id="store-sprouts" onclick="selectStore('sprouts')">
+        <div class="store-name">Sprouts</div>
+        <div class="store-tier">Natural / specialty</div>
+      </button>
+      <button class="store-btn" id="store-aldi" onclick="selectStore('aldi')">
+        <div class="store-name">Aldi</div>
+        <div class="store-tier">Deep discount</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- WEEK SELECTOR -->
+  <div class="card">
+    <div class="card-title">🔄 Which Week?</div>
+    <div class="week-row">
+      <div class="week-label">Different meals every week — <strong id="weekLabel">Week 1</strong></div>
+      <div class="week-nav">
+        <button class="week-btn" onclick="changeWeek(-1)">‹</button>
+        <div class="week-num" id="weekNum">1</div>
+        <button class="week-btn" onclick="changeWeek(1)">›</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('plan')">🥗 Meal Plan</button>
+    <button class="tab" onclick="switchTab('shop')">📋 Shopping</button>
+    <button class="tab" onclick="switchTab('budget')">💰 Budget</button>
+  </div>
+
+  <!-- MEAL PLAN TAB -->
+  <div class="tab-panel active" id="tab-plan">
+    <div id="mealPlanContainer" style="margin-top:16px;"></div>
+  </div>
+
+  <!-- SHOPPING TAB -->
+  <div class="tab-panel" id="tab-shop">
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">📋 Shopping List</div>
+      <div id="shopList"></div>
+    </div>
+    <div class="actions-row">
+      <button class="btn-primary" onclick="window.print()">🖨️ Print</button>
+      <button class="btn-secondary" onclick="copyShop()">📋 Copy</button>
+    </div>
+  </div>
+
+  <!-- BUDGET TAB -->
+  <div class="tab-panel" id="tab-budget">
+
+    <!-- BUDGET SETTER -->
+    <div class="budget-input-card" style="margin-top:18px;">
+      <div class="card-title">🎯 Your Budget</div>
+      <div class="budget-input-row">
+        <div class="budget-input-label">What's your grocery budget for this plan?</div>
+        <div class="budget-input-wrap">
+          <div class="budget-currency">$</div>
+          <input class="budget-input" id="budgetGoal" type="number" min="0" max="9999" placeholder="0" oninput="onBudgetInput()" />
+        </div>
+      </div>
+      <div class="budget-input-hint">Leave blank to just see the estimate below.</div>
+      <div id="budgetBarWrap" class="budget-bar-wrap" style="display:none;">
+        <div style="height:1px;background:#e0ede6;margin:14px 0;"></div>
+        <div class="budget-bar-labels">
+          <span style="font-size:11px;">$0</span>
+          <span class="bar-estimate" id="barEstLabel">Est. $—</span>
+          <span id="barGoalLabel" style="font-size:11px;color:var(--green-mid);font-weight:600;">Goal $—</span>
+        </div>
+        <div class="budget-bar-track">
+          <div class="budget-bar-fill bar-green" id="budgetBarFill" style="width:0%"></div>
+        </div>
+        <div class="budget-verdict verdict-none" id="budgetVerdict">Enter your plan above to see estimate.</div>
+      </div>
+    </div>
+
+    <!-- ESTIMATE CARD -->
+    <div class="budget-card">
+      <div class="budget-title">💰 Estimated Cost</div>
+      <div class="budget-context" id="budgetContext">—</div>
+      <div class="budget-range" id="budgetRange">—</div>
+      <div class="budget-per-person" id="budgetPerPerson"></div>
+      <div class="budget-breakdown" id="budgetBreakdown"></div>
+      <div class="budget-disclaimer">⚠️ Estimates based on national averages. Your actual cost may vary by location and store.</div>
+    </div>
+    <div class="actions-row">
+      <button class="btn-primary" onclick="window.print()">🖨️ Print Plan</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- STICKY BAR -->
+<div class="summary-bar">
+  <div class="summary-info">
+    <strong id="barDays">0 days</strong> · <span id="barMeals">all meals</span> · <strong id="barPeople">2</strong> people
+  </div>
+  <div class="summary-cost" id="barCost">$—</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// MEAL LIBRARY — 14 breakfasts, 14 dinners
+// ═══════════════════════════════════════════════════
+
+const BREAKFASTS = [
+  // 1
+  { name:'Overnight Oats with Mixed Berries', time:'5 min prep night before',
+    ingredients:[
+      {item:'Rolled oats',qty:'½ cup',ppd:0.5,unit:'cup',cat:'Dry Goods'},
+      {item:'Canned coconut milk',qty:'⅓ cup',ppd:0.33,unit:'cup',cat:'Canned Goods'},
+      {item:'Chia seeds',qty:'1 tbsp',ppd:1,unit:'tbsp',cat:'Dry Goods',spice:true},
+      {item:'Maple syrup',qty:'1 tsp',ppd:1,unit:'tsp',cat:'Pantry',spice:true},
+      {item:'Frozen mixed berries',qty:'¼ cup',ppd:0.25,unit:'cup',cat:'Frozen'},
+    ],
+    steps:['Combine oats, coconut milk, chia seeds, and maple syrup in a jar.','Stir well, cover, and refrigerate overnight.','Top with thawed berries in the morning and enjoy cold.']
+  },
+  // 2
+  { name:'Green Power Smoothie', time:'5 min',
+    ingredients:[
+      {item:'Frozen banana',qty:'1',ppd:1,unit:null,cat:'Produce'},
+      {item:'Baby spinach',qty:'1 cup',ppd:1,unit:'cup',cat:'Produce'},
+      {item:'Oat milk',qty:'1 cup',ppd:1,unit:'cup',cat:'Dairy-Free Milk'},
+      {item:'Ground flaxseed',qty:'1 tbsp',ppd:1,unit:'tbsp',cat:'Dry Goods',spice:true},
+      {item:'Medjool dates',qty:'2',ppd:2,unit:null,cat:'Produce'},
+    ],
+    steps:['Add everything to a blender.','Blend 60 seconds until smooth.','Pour and go.']
+  },
+  // 3
+  { name:'Avocado Toast with Hemp Seeds', time:'8 min',
+    ingredients:[
+      {item:'Vegan whole-grain bread',qty:'2 slices',ppd:2,unit:null,cat:'Bread & Bakery'},
+      {item:'Ripe avocado',qty:'½',ppd:0.5,unit:null,cat:'Produce'},
+      {item:'Hemp seeds',qty:'1 tbsp',ppd:1,unit:'tbsp',cat:'Dry Goods',spice:true},
+      {item:'Red pepper flakes',qty:'pinch',ppd:0,unit:null,cat:'Spices',spice:true},
+      {item:'Sea salt',qty:'pinch',ppd:0,unit:null,cat:'Spices',spice:true},
+    ],
+    steps:['Toast bread until golden.','Mash avocado and spread onto toast.','Top with hemp seeds, red pepper flakes, and salt.']
+  },
+  // 4
+  { name:'Banana Oat Pancakes', time:'15 min',
+    ingredients:[
+      {item:'Ripe bananas',qty:'2',ppd:2,unit:null,cat:'Produce'},
+      {item:'Rolled oats',qty:'1 cup',ppd:1,unit:'cup',cat:'Dry Goods'},
+      {item:'Oat milk',qty:'¼ cup',ppd:0.25,unit:'cup',cat:'Dairy-Free Milk'},
+      {item:'Cinnamon',qty:'½ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Maple syrup (topping)',qty:'2 tbsp',ppd:0,unit:null,cat:'Pantry',spice:true},
+    ],
+    steps:['Mash bananas smooth in a bowl.','Stir in oats, oat milk, and cinnamon.','Cook spoonfuls on a lightly oiled skillet 2–3 min per side.','Serve with maple syrup.']
+  },
+  // 5
+  { name:'Chia Pudding with Mango', time:'5 min prep night before',
+    ingredients:[
+      {item:'Chia seeds',qty:'3 tbsp',ppd:3,unit:'tbsp',cat:'Dry Goods'},
+      {item:'Canned coconut milk',qty:'¾ cup',ppd:0.75,unit:'cup',cat:'Canned Goods'},
+      {item:'Maple syrup',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Pantry',spice:true},
+      {item:'Vanilla extract',qty:'¼ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Frozen mango chunks',qty:'½ cup',ppd:0.5,unit:'cup',cat:'Frozen'},
+    ],
+    steps:['Whisk chia seeds, coconut milk, maple syrup, and vanilla in a jar.','Refrigerate overnight.','Top with thawed mango in the morning.']
+  },
+  // 6
+  { name:'Savory Tofu Scramble', time:'12 min',
+    ingredients:[
+      {item:'Firm tofu (non-GMO)',qty:'½ block',ppd:0.5,unit:null,cat:'Protein'},
+      {item:'Bell pepper, diced',qty:'½',ppd:0.5,unit:null,cat:'Produce'},
+      {item:'Baby spinach',qty:'1 cup',ppd:1,unit:'cup',cat:'Produce'},
+      {item:'Turmeric',qty:'¼ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Nutritional yeast',qty:'1 tbsp',ppd:0,unit:'tbsp',cat:'Dry Goods',spice:true},
+      {item:'Olive oil',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Oils',spice:true},
+    ],
+    steps:['Heat olive oil in a skillet over medium-high.','Crumble tofu in and cook 3 min.','Add bell pepper 2 min, then spinach, turmeric, and nutritional yeast.','Cook until spinach wilts. Season and serve.']
+  },
+  // 7
+  { name:'Quick Granola Bowl', time:'3 min',
+    ingredients:[
+      {item:'Vegan granola (tree nut-free)',qty:'½ cup',ppd:0.5,unit:'cup',cat:'Dry Goods'},
+      {item:'Oat milk',qty:'½ cup',ppd:0.5,unit:'cup',cat:'Dairy-Free Milk'},
+      {item:'Frozen mango chunks',qty:'¼ cup',ppd:0.25,unit:'cup',cat:'Frozen'},
+      {item:'Sunflower seed butter',qty:'1 tbsp',ppd:1,unit:'tbsp',cat:'Pantry'},
+    ],
+    steps:['Pour granola into a bowl.','Add oat milk and thawed mango.','Drizzle sunflower seed butter. Done.']
+  },
+  // 8
+  { name:'Peanut-Free Smoothie Bowl', time:'8 min',
+    ingredients:[
+      {item:'Frozen banana',qty:'1',ppd:1,unit:null,cat:'Produce'},
+      {item:'Frozen mango chunks',qty:'½ cup',ppd:0.5,unit:'cup',cat:'Frozen'},
+      {item:'Oat milk',qty:'¼ cup',ppd:0.25,unit:'cup',cat:'Dairy-Free Milk'},
+      {item:'Vegan granola (tree nut-free)',qty:'¼ cup',ppd:0.25,unit:'cup',cat:'Dry Goods'},
+      {item:'Sunflower seeds',qty:'1 tbsp',ppd:0,unit:'tbsp',cat:'Dry Goods',spice:true},
+      {item:'Coconut flakes (unsweetened)',qty:'1 tbsp',ppd:0,unit:'tbsp',cat:'Dry Goods',spice:true},
+    ],
+    steps:['Blend frozen banana, mango, and oat milk until thick and smooth.','Pour into a bowl.','Top with granola, sunflower seeds, and coconut flakes.']
+  },
+  // 9
+  { name:'Warm Apple Cinnamon Oatmeal', time:'10 min',
+    ingredients:[
+      {item:'Rolled oats',qty:'½ cup',ppd:0.5,unit:'cup',cat:'Dry Goods'},
+      {item:'Oat milk',qty:'1 cup',ppd:1,unit:'cup',cat:'Dairy-Free Milk'},
+      {item:'Apple, peeled and diced',qty:'½',ppd:0.5,unit:null,cat:'Produce'},
+      {item:'Cinnamon',qty:'½ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Maple syrup',qty:'1 tbsp',ppd:0,unit:'tbsp',cat:'Pantry',spice:true},
+      {item:'Sunflower seed butter',qty:'1 tbsp',ppd:1,unit:'tbsp',cat:'Pantry'},
+    ],
+    steps:['Bring oat milk to a simmer, stir in oats and diced apple.','Cook 5 min stirring occasionally until thick.','Stir in cinnamon and maple syrup.','Top with sunflower seed butter.']
+  },
+  // 10
+  { name:'Mango Turmeric Smoothie', time:'5 min',
+    ingredients:[
+      {item:'Frozen mango chunks',qty:'1 cup',ppd:1,unit:'cup',cat:'Frozen'},
+      {item:'Frozen banana',qty:'½',ppd:0.5,unit:null,cat:'Produce'},
+      {item:'Oat milk',qty:'¾ cup',ppd:0.75,unit:'cup',cat:'Dairy-Free Milk'},
+      {item:'Ground turmeric',qty:'¼ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Ground ginger',qty:'¼ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Maple syrup',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Pantry',spice:true},
+    ],
+    steps:['Add all ingredients to a blender.','Blend until smooth and creamy.','Serve immediately.']
+  },
+  // 11
+  { name:'Vegan Breakfast Burrito', time:'15 min',
+    ingredients:[
+      {item:'Firm tofu (non-GMO)',qty:'½ block',ppd:0.5,unit:null,cat:'Protein'},
+      {item:'Corn tortillas (6-inch)',qty:'2',ppd:2,unit:null,cat:'Bread & Bakery'},
+      {item:'Baby spinach',qty:'½ cup',ppd:0.5,unit:'cup',cat:'Produce'},
+      {item:'Salsa (jar)',qty:'2 tbsp',ppd:0,unit:'tbsp',cat:'Pantry'},
+      {item:'Avocado',qty:'¼',ppd:0.25,unit:null,cat:'Produce'},
+      {item:'Cumin',qty:'½ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Olive oil',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Oils',spice:true},
+    ],
+    steps:['Crumble tofu in a skillet with olive oil and cumin. Cook 5 min.','Add spinach and cook until wilted.','Warm tortillas and fill with tofu scramble, avocado, and salsa.']
+  },
+  // 12
+  { name:'Sweet Potato Toast', time:'12 min',
+    ingredients:[
+      {item:'Sweet potato',qty:'1 medium',ppd:1,unit:null,cat:'Produce'},
+      {item:'Sunflower seed butter',qty:'2 tbsp',ppd:2,unit:'tbsp',cat:'Pantry'},
+      {item:'Frozen banana, sliced',qty:'½',ppd:0.5,unit:null,cat:'Produce'},
+      {item:'Cinnamon',qty:'¼ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Hemp seeds',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Dry Goods',spice:true},
+    ],
+    steps:['Slice sweet potato lengthwise into ¼-inch slabs.','Toast in a toaster on high 2–3 rounds until cooked through and edges are golden.','Top with sunflower seed butter, banana slices, cinnamon, and hemp seeds.']
+  },
+  // 13
+  { name:'Coconut Yogurt Parfait', time:'5 min',
+    ingredients:[
+      {item:'Vegan coconut yogurt (plain)',qty:'½ cup',ppd:0.5,unit:'cup',cat:'Dairy-Free Milk'},
+      {item:'Vegan granola (tree nut-free)',qty:'¼ cup',ppd:0.25,unit:'cup',cat:'Dry Goods'},
+      {item:'Frozen mixed berries (thawed)',qty:'¼ cup',ppd:0.25,unit:'cup',cat:'Frozen'},
+      {item:'Maple syrup',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Pantry',spice:true},
+      {item:'Ground flaxseed',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Dry Goods',spice:true},
+    ],
+    steps:['Layer coconut yogurt in a glass or bowl.','Add thawed berries and granola.','Drizzle maple syrup and sprinkle flaxseed on top.']
+  },
+  // 14
+  { name:'Loaded Veggie Toast', time:'10 min',
+    ingredients:[
+      {item:'Vegan whole-grain bread',qty:'2 slices',ppd:2,unit:null,cat:'Bread & Bakery'},
+      {item:'Canned white beans, mashed',qty:'¼ cup',ppd:0.25,unit:'cup',cat:'Canned Goods'},
+      {item:'Baby spinach',qty:'½ cup',ppd:0.5,unit:'cup',cat:'Produce'},
+      {item:'Cherry tomatoes, halved',qty:'¼ cup',ppd:0.25,unit:'cup',cat:'Produce'},
+      {item:'Olive oil',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Oils',spice:true},
+      {item:'Garlic powder',qty:'¼ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Sea salt',qty:'pinch',ppd:0,unit:null,cat:'Spices',spice:true},
+    ],
+    steps:['Toast bread.','Season mashed white beans with garlic powder and salt.','Spread beans on toast, top with spinach and cherry tomatoes.','Drizzle with olive oil.']
+  },
+];
+
+const DINNERS = [
+  // 1
+  { name:'Daring Shredded Tacos', time:'25 min', protein:'Daring Shredded',
+    ingredients:[
+      {item:'Daring Original Shredded',qty:'1 bag',ppd:0.5,unit:null,cat:'Protein'},
+      {item:'Corn tortillas (6-inch)',qty:'3',ppd:3,unit:null,cat:'Bread & Bakery'},
+      {item:'Red cabbage, shredded',qty:'1 cup',ppd:1,unit:'cup',cat:'Produce'},
+      {item:'Salsa (jar)',qty:'¼ cup',ppd:0.25,unit:'cup',cat:'Pantry'},
+      {item:'Avocado',qty:'½',ppd:0.5,unit:null,cat:'Produce'},
+      {item:'Lime',qty:'1',ppd:1,unit:null,cat:'Produce'},
+      {item:'Cumin',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+    ],
+    steps:['Cook Daring shredded in a skillet with a splash of water over medium-high, 5–7 min.','Season with cumin, salt, and pepper.','Warm tortillas in a dry pan 30 sec per side.','Build tacos with Daring, cabbage, avocado, salsa, and lime.']
+  },
+  // 2
+  { name:'Red Lentil & Sweet Potato Curry', time:'30 min', protein:'Red Lentils',
+    ingredients:[
+      {item:'Red lentils, dry',qty:'¾ cup',ppd:0.75,unit:'cup',cat:'Dry Goods'},
+      {item:'Sweet potato, cubed',qty:'1 large',ppd:1,unit:null,cat:'Produce'},
+      {item:'Canned diced tomatoes',qty:'1 can (14 oz)',ppd:1,unit:null,cat:'Canned Goods'},
+      {item:'Canned coconut milk',qty:'½ can',ppd:0.5,unit:null,cat:'Canned Goods'},
+      {item:'Curry powder',qty:'1½ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Garlic cloves, minced',qty:'2',ppd:2,unit:null,cat:'Produce'},
+      {item:'Ground ginger',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Brown rice',qty:'½ cup dry',ppd:0.5,unit:'cup',cat:'Dry Goods'},
+    ],
+    steps:['Start rice per package directions.','Sauté garlic and ginger in a little oil 1 min.','Add lentils, sweet potato, tomatoes, coconut milk, curry powder, and 1½ cups water.','Simmer covered 20 min until lentils are tender. Season with salt.','Serve over rice.']
+  },
+  // 3
+  { name:"Gardein Chick'n Stir-Fry", time:'25 min', protein:"Gardein Chick'n",
+    ingredients:[
+      {item:"Gardein Chick'n Strips",qty:'1 bag',ppd:0.5,unit:null,cat:'Protein'},
+      {item:'Broccoli florets',qty:'2 cups',ppd:2,unit:'cup',cat:'Produce'},
+      {item:'Snap peas',qty:'1 cup',ppd:1,unit:'cup',cat:'Produce'},
+      {item:'Low-sodium tamari',qty:'2 tbsp',ppd:2,unit:'tbsp',cat:'Pantry',spice:true},
+      {item:'Sesame oil',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Oils',spice:true},
+      {item:'Garlic cloves, minced',qty:'2',ppd:2,unit:null,cat:'Produce'},
+      {item:'Brown rice',qty:'½ cup dry',ppd:0.5,unit:'cup',cat:'Dry Goods'},
+    ],
+    steps:['Cook rice per package directions.','Heat sesame oil in a wok over high heat.','Cook Gardein strips 3–4 min until browned. Set aside.','Stir-fry broccoli, snap peas, and garlic 4 min.','Return chick\'n, add tamari. Toss 1 min. Serve over rice.']
+  },
+  // 4
+  { name:'Black Bean Burrito Bowls', time:'25 min', protein:'Black Beans',
+    ingredients:[
+      {item:'Canned black beans',qty:'1 can (15 oz)',ppd:1,unit:null,cat:'Canned Goods'},
+      {item:'Brown rice',qty:'½ cup dry',ppd:0.5,unit:'cup',cat:'Dry Goods'},
+      {item:'Frozen corn',qty:'½ cup',ppd:0.5,unit:'cup',cat:'Frozen'},
+      {item:'Salsa (jar)',qty:'¼ cup',ppd:0.25,unit:'cup',cat:'Pantry'},
+      {item:'Avocado',qty:'½',ppd:0.5,unit:null,cat:'Produce'},
+      {item:'Lime',qty:'1',ppd:1,unit:null,cat:'Produce'},
+      {item:'Cumin',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Smoked paprika',qty:'½ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+    ],
+    steps:['Cook rice.','Drain and warm black beans with cumin, smoked paprika, and salt.','Warm frozen corn in the same pan.','Build bowls: rice, beans, corn, salsa, avocado. Squeeze lime over top.']
+  },
+  // 5
+  { name:'Daring Shredded Fried Rice', time:'25 min', protein:'Daring Shredded',
+    ingredients:[
+      {item:'Daring Original Shredded',qty:'1 bag',ppd:0.5,unit:null,cat:'Protein'},
+      {item:'Brown rice (day-old cooked)',qty:'2 cups',ppd:2,unit:'cup',cat:'Dry Goods'},
+      {item:'Frozen peas & carrots',qty:'1 cup',ppd:1,unit:'cup',cat:'Frozen'},
+      {item:'Low-sodium tamari',qty:'2 tbsp',ppd:0,unit:'tbsp',cat:'Pantry',spice:true},
+      {item:'Sesame oil',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Oils',spice:true},
+      {item:'Garlic powder',qty:'½ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Green onions',qty:'3 stalks',ppd:3,unit:null,cat:'Produce'},
+    ],
+    steps:['Heat sesame oil in a wok over high heat.','Cook Daring shredded 4–5 min until crispy at edges.','Add frozen veggies, stir-fry 2 min.','Push aside and add rice directly to the hot pan — let crisp 2 min.','Mix everything, add tamari and garlic powder. Top with green onions.']
+  },
+  // 6
+  { name:'White Bean & Kale Soup', time:'30 min', protein:'White Beans',
+    ingredients:[
+      {item:'Canned cannellini beans',qty:'2 cans (15 oz)',ppd:2,unit:null,cat:'Canned Goods'},
+      {item:'Kale, chopped',qty:'3 cups',ppd:3,unit:'cup',cat:'Produce'},
+      {item:'Canned diced tomatoes',qty:'1 can (14 oz)',ppd:1,unit:null,cat:'Canned Goods'},
+      {item:'Low-sodium vegetable broth',qty:'3 cups',ppd:3,unit:'cup',cat:'Pantry'},
+      {item:'Garlic cloves, minced',qty:'3',ppd:3,unit:null,cat:'Produce'},
+      {item:'Italian seasoning',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Olive oil',qty:'1 tbsp',ppd:0,unit:'tbsp',cat:'Oils',spice:true},
+    ],
+    steps:['Sauté garlic in olive oil 1 min.','Add broth, tomatoes, beans, and Italian seasoning. Boil.','Reduce heat and simmer 15 min.','Add kale, cook 5 more min. Season and serve.']
+  },
+  // 7
+  { name:'Daring BBQ Sliders', time:'20 min', protein:'Daring Shredded',
+    ingredients:[
+      {item:'Daring Original Shredded',qty:'1 bag',ppd:0.5,unit:null,cat:'Protein'},
+      {item:'Vegan BBQ sauce',qty:'¼ cup',ppd:0.25,unit:'cup',cat:'Pantry'},
+      {item:'Vegan slider rolls',qty:'3',ppd:3,unit:null,cat:'Bread & Bakery'},
+      {item:'Red cabbage, shredded',qty:'1 cup',ppd:1,unit:'cup',cat:'Produce'},
+      {item:'Apple cider vinegar',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Pantry',spice:true},
+      {item:'Dill pickles, sliced',qty:'a few slices',ppd:0,unit:null,cat:'Pantry'},
+    ],
+    steps:['Cook Daring shredded in a skillet 5–7 min.','Toss with BBQ sauce, cook 1–2 more min.','Mix cabbage with apple cider vinegar for quick slaw.','Build sliders: BBQ Daring, slaw, pickles.']
+  },
+  // 8
+  { name:'Chickpea Tikka Masala', time:'30 min', protein:'Chickpeas',
+    ingredients:[
+      {item:'Canned chickpeas',qty:'2 cans (15 oz)',ppd:2,unit:null,cat:'Canned Goods'},
+      {item:'Canned diced tomatoes',qty:'1 can (14 oz)',ppd:1,unit:null,cat:'Canned Goods'},
+      {item:'Canned coconut milk',qty:'½ can',ppd:0.5,unit:null,cat:'Canned Goods'},
+      {item:'Garlic cloves, minced',qty:'3',ppd:3,unit:null,cat:'Produce'},
+      {item:'Garam masala',qty:'2 tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Smoked paprika',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Brown rice',qty:'½ cup dry',ppd:0.5,unit:'cup',cat:'Dry Goods'},
+      {item:'Baby spinach',qty:'2 cups',ppd:2,unit:'cup',cat:'Produce'},
+    ],
+    steps:['Cook rice.','Sauté garlic 1 min in oil.','Add chickpeas, tomatoes, coconut milk, garam masala, and paprika.','Simmer 15 min. Stir in spinach and cook until wilted.','Serve over rice.']
+  },
+  // 9
+  { name:'Daring Shredded Fajita Bowls', time:'25 min', protein:'Daring Shredded',
+    ingredients:[
+      {item:'Daring Original Shredded',qty:'1 bag',ppd:0.5,unit:null,cat:'Protein'},
+      {item:'Bell peppers (mixed colors), sliced',qty:'2',ppd:2,unit:null,cat:'Produce'},
+      {item:'Red onion, sliced',qty:'½',ppd:0.5,unit:null,cat:'Produce'},
+      {item:'Brown rice',qty:'½ cup dry',ppd:0.5,unit:'cup',cat:'Dry Goods'},
+      {item:'Salsa (jar)',qty:'¼ cup',ppd:0.25,unit:'cup',cat:'Pantry'},
+      {item:'Avocado',qty:'½',ppd:0.5,unit:null,cat:'Produce'},
+      {item:'Smoked paprika',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Cumin',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+    ],
+    steps:['Cook rice.','Sauté bell peppers and onion in oil over high heat 5 min until charred at edges.','Add Daring shredded, smoked paprika, and cumin. Cook 5 more min.','Build bowls: rice, fajita mix, salsa, sliced avocado.']
+  },
+  // 10
+  { name:'Loaded Veggie Pasta', time:'25 min', protein:'White Beans',
+    ingredients:[
+      {item:'Pasta (rice or chickpea-based)',qty:'6 oz dry',ppd:3,unit:null,cat:'Dry Goods'},
+      {item:'Canned white beans',qty:'1 can (15 oz)',ppd:1,unit:null,cat:'Canned Goods'},
+      {item:'Canned diced tomatoes',qty:'1 can (14 oz)',ppd:1,unit:null,cat:'Canned Goods'},
+      {item:'Baby spinach',qty:'2 cups',ppd:2,unit:'cup',cat:'Produce'},
+      {item:'Garlic cloves, minced',qty:'3',ppd:3,unit:null,cat:'Produce'},
+      {item:'Olive oil',qty:'1 tbsp',ppd:0,unit:'tbsp',cat:'Oils',spice:true},
+      {item:'Italian seasoning',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Nutritional yeast',qty:'2 tbsp',ppd:0,unit:'tbsp',cat:'Dry Goods',spice:true},
+    ],
+    steps:['Cook pasta per package. Reserve ½ cup pasta water.','Sauté garlic in olive oil 1 min.','Add tomatoes, beans, and Italian seasoning. Simmer 8 min.','Add spinach and cooked pasta. Toss with a splash of pasta water.','Top with nutritional yeast.']
+  },
+  // 11
+  { name:'Smoky Black-Eyed Pea Stew', time:'30 min', protein:'Black-Eyed Peas',
+    ingredients:[
+      {item:'Canned black-eyed peas',qty:'2 cans (15 oz)',ppd:2,unit:null,cat:'Canned Goods'},
+      {item:'Canned diced tomatoes',qty:'1 can (14 oz)',ppd:1,unit:null,cat:'Canned Goods'},
+      {item:'Low-sodium vegetable broth',qty:'2 cups',ppd:2,unit:'cup',cat:'Pantry'},
+      {item:'Kale, chopped',qty:'2 cups',ppd:2,unit:'cup',cat:'Produce'},
+      {item:'Red onion, diced',qty:'½',ppd:0.5,unit:null,cat:'Produce'},
+      {item:'Smoked paprika',qty:'1½ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Garlic cloves, minced',qty:'3',ppd:3,unit:null,cat:'Produce'},
+      {item:'Brown rice',qty:'½ cup dry',ppd:0.5,unit:'cup',cat:'Dry Goods'},
+    ],
+    steps:['Cook rice.','Sauté onion and garlic in oil 3 min.','Add peas, tomatoes, broth, and smoked paprika. Simmer 15 min.','Stir in kale and cook 5 more min. Serve over rice.']
+  },
+  // 12
+  { name:'Daring Shredded Rice Paper Wraps', time:'20 min', protein:'Daring Shredded',
+    ingredients:[
+      {item:'Daring Original Shredded',qty:'1 bag',ppd:0.5,unit:null,cat:'Protein'},
+      {item:'Rice paper wrappers',qty:'4 sheets',ppd:4,unit:null,cat:'Dry Goods'},
+      {item:'Cucumber, julienned',qty:'½',ppd:0.5,unit:null,cat:'Produce'},
+      {item:'Shredded carrots',qty:'½ cup',ppd:0.5,unit:'cup',cat:'Produce'},
+      {item:'Baby spinach',qty:'1 cup',ppd:1,unit:'cup',cat:'Produce'},
+      {item:'Low-sodium tamari',qty:'2 tbsp',ppd:0,unit:'tbsp',cat:'Pantry',spice:true},
+      {item:'Lime',qty:'1',ppd:1,unit:null,cat:'Produce'},
+      {item:'Sesame oil',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Oils',spice:true},
+    ],
+    steps:['Cook Daring shredded with sesame oil and a splash of tamari 5–7 min.','Dip rice paper wrappers in warm water 15 sec until pliable.','Fill each with Daring, cucumber, carrots, and spinach.','Roll tight. Serve with remaining tamari and lime juice for dipping.']
+  },
+  // 13
+  { name:'Spiced Lentil Soup', time:'35 min', protein:'Green Lentils',
+    ingredients:[
+      {item:'Green lentils, dry',qty:'¾ cup',ppd:0.75,unit:'cup',cat:'Dry Goods'},
+      {item:'Canned diced tomatoes',qty:'1 can (14 oz)',ppd:1,unit:null,cat:'Canned Goods'},
+      {item:'Low-sodium vegetable broth',qty:'4 cups',ppd:4,unit:'cup',cat:'Pantry'},
+      {item:'Carrots, diced',qty:'2 medium',ppd:2,unit:null,cat:'Produce'},
+      {item:'Celery-free — use zucchini, diced',qty:'1 small',ppd:1,unit:null,cat:'Produce'},
+      {item:'Garlic cloves, minced',qty:'3',ppd:3,unit:null,cat:'Produce'},
+      {item:'Cumin',qty:'1½ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Turmeric',qty:'½ tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+    ],
+    steps:['Sauté garlic, carrots, and zucchini in oil 3 min.','Add lentils, tomatoes, broth, cumin, and turmeric.','Bring to a boil, then simmer 25 min until lentils are soft.','Season with salt and pepper. Serve with vegan bread.']
+  },
+  // 14
+  { name:'Gardein Meatball Marinara Bowl', time:'20 min', protein:"Gardein Meatballs",
+    ingredients:[
+      {item:'Gardein Classic Meatballs',qty:'1 bag',ppd:0.5,unit:null,cat:'Protein'},
+      {item:'Vegan marinara sauce (jar)',qty:'1 cup',ppd:1,unit:'cup',cat:'Pantry'},
+      {item:'Brown rice',qty:'½ cup dry',ppd:0.5,unit:'cup',cat:'Dry Goods'},
+      {item:'Baby spinach',qty:'2 cups',ppd:2,unit:'cup',cat:'Produce'},
+      {item:'Garlic cloves, minced',qty:'2',ppd:2,unit:null,cat:'Produce'},
+      {item:'Olive oil',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Oils',spice:true},
+      {item:'Italian seasoning',qty:'1 tsp',ppd:0,unit:'tsp',cat:'Spices',spice:true},
+      {item:'Nutritional yeast',qty:'1 tbsp',ppd:0,unit:'tbsp',cat:'Dry Goods',spice:true},
+    ],
+    steps:['Cook rice.','Bake or pan-cook Gardein meatballs per package.','Sauté garlic in olive oil 1 min, add marinara and Italian seasoning. Simmer 5 min.','Add spinach and stir until wilted.','Serve meatballs and sauce over rice. Top with nutritional yeast.']
+  },
+];
+
+// ═══════════════════════════════════════════════════
+// WEEK ROTATION ORDERS
+// Each week gets a shuffled-but-consistent order of 7 meals
+// so weeks never repeat the same sequence
+// ═══════════════════════════════════════════════════
+const WEEK_ORDERS = {
+  breakfast: {
+    1: [0,1,2,3,4,5,6],
+    2: [7,8,9,10,11,12,13],
+    3: [2,9,4,11,0,13,7],
+    4: [5,12,1,8,6,10,3],
+  },
+  dinner: {
+    1: [0,1,2,3,4,5,6],
+    2: [7,8,9,10,11,12,13],
+    3: [2,9,4,11,0,13,7],
+    4: [5,12,1,8,6,10,3],
+  }
+};
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+const STORE_MULTI = { walmart:0.78, kroger:0.90, sprouts:1.0, aldi:0.70 };
+const STORE_LABEL = { walmart:'Walmart', kroger:'Kroger/Safeway', sprouts:'Sprouts', aldi:'Aldi' };
+const DAY_NAMES   = ['','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const LS_KEY = 'planttable_v2';
+
+let state = {
+  people: 2,
+  activeDays: [],
+  planDays: 0,
+  meals: { breakfast:true, lunch:true, dinner:true },
+  store: 'sprouts',
+  week: 1,
+  openRecipes: [],   // array for JSON serialization
+  checkedItems: [],  // items user has marked as "already have"
+  budgetGoal: 0,     // user's target budget (0 = not set)
+};
+
+// ── localStorage save/load ─────────────────────────
+function saveState() {
+  try {
+    const toSave = {...state};
+    localStorage.setItem(LS_KEY, JSON.stringify(toSave));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    // Merge saved into state (protect against missing keys)
+    if (saved.people)      state.people = saved.people;
+    if (saved.activeDays)  state.activeDays = saved.activeDays;
+    if (saved.planDays !== undefined) state.planDays = saved.planDays;
+    if (saved.meals)       state.meals = {...state.meals, ...saved.meals};
+    if (saved.store)       state.store = saved.store;
+    if (saved.week)        state.week = saved.week;
+    if (saved.openRecipes) state.openRecipes = saved.openRecipes;
+    if (saved.checkedItems) state.checkedItems = saved.checkedItems;
+    if (saved.budgetGoal)   state.budgetGoal = saved.budgetGoal;
+  } catch(e) {}
+}
+
+// ── Computed helpers ───────────────────────────────
+function getDayList() {
+  if (state.planDays > 0) return Array.from({length:state.planDays},(_,i)=>i+1);
+  return [...state.activeDays].sort((a,b)=>a-b);
+}
+function getDayLabel(d) {
+  if (state.planDays > 0) return 'Day ' + d;
+  return DAY_NAMES[d] || ('Day ' + d);
+}
+function totalDays() {
+  return state.planDays > 0 ? state.planDays : state.activeDays.length;
+}
+function activeMealCount() {
+  return (state.meals.breakfast?1:0)+(state.meals.lunch?1:0)+(state.meals.dinner?1:0);
+}
+
+// Get meal for a given day-index, using week rotation
+function getMeal(type, dayIdx) {
+  const weekKey = ((state.week - 1) % 4) + 1;
+  const order = WEEK_ORDERS[type][weekKey];
+  const lib = type === 'breakfast' ? BREAKFASTS : DINNERS;
+  // For multi-week plans, shift week per 7 days
+  const weekOffset = Math.floor(dayIdx / 7);
+  const dayInWeek  = dayIdx % 7;
+  const adjustedWeekKey = ((state.week - 1 + weekOffset) % 4) + 1;
+  const adjustedOrder = WEEK_ORDERS[type][adjustedWeekKey];
+  return lib[adjustedOrder[dayInWeek % 7]];
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER: MEAL PLAN
+// ═══════════════════════════════════════════════════
+function renderMealPlan() {
+  const container = document.getElementById('mealPlanContainer');
+  const days = getDayList();
+  if (days.length === 0) {
+    container.innerHTML = '<div class="card empty-state"><p>Select days or a full plan above to get started.</p></div>';
+    return;
+  }
+  let html = '';
+  days.forEach((d, idx) => {
+    html += `<div class="day-block"><div class="day-header">${getDayLabel(d)}</div>`;
+    if (state.meals.breakfast) html += mealCardHTML('breakfast', getMeal('breakfast', idx), `b${idx}`);
+    if (state.meals.lunch) {
+      const prev = getMeal('dinner', idx > 0 ? idx-1 : 6);
+      html += mealCardHTML('lunch', {
+        name: 'Leftover ' + prev.name,
+        time: '0 min — no cooking!',
+        protein: prev.protein,
+        ingredients: [],
+        steps: ["Pull last night's dinner from the fridge.", "Reheat 1–2 min or enjoy cold.", "Done. That's the whole point."]
+      }, `l${idx}`);
+    }
+    if (state.meals.dinner) html += mealCardHTML('dinner', getMeal('dinner', idx), `d${idx}`);
+    html += `</div>`;
+  });
+  container.innerHTML = html;
+}
+
+function mealCardHTML(type, meal, key) {
+  const label = {breakfast:'Breakfast', lunch:'Lunch', dinner:'Dinner'}[type];
+  const isOpen = state.openRecipes.includes(key);
+  let ingHTML = '';
+  if (meal.ingredients && meal.ingredients.length) {
+    ingHTML = `<div class="recipe-section-title">Ingredients (per serving)</div><ul class="ingredient-list">`;
+    meal.ingredients.forEach(i => { ingHTML += `<li><span>${i.item}</span><span>${i.qty}</span></li>`; });
+    ingHTML += `</ul>`;
+  }
+  let stepsHTML = '';
+  if (meal.steps && meal.steps.length) {
+    stepsHTML = `<div class="recipe-section-title">Steps</div><ol class="steps-list">`;
+    meal.steps.forEach(s => { stepsHTML += `<li>${s}</li>`; });
+    stepsHTML += `</ol>`;
+  }
+  const ptag = meal.protein ? `<div class="protein-tag">🌿 ${meal.protein}</div>` : '';
+  return `<div class="meal-card${isOpen?' open':''}" onclick="toggleRecipe('${key}')">
+    <div class="meal-card-header">
+      <div class="meal-type-dot dot-${type}"></div>
+      <div class="meal-card-info">
+        <div class="meal-card-type">${label}</div>
+        <div class="meal-card-name">${meal.name}</div>
+        <div class="meal-card-meta">⏱ ${meal.time}</div>
+        ${ptag}
+      </div>
+      <div class="expand-icon">▾</div>
+    </div>
+    <div class="recipe-panel${isOpen?' open':''}">
+      ${ingHTML}${stepsHTML}
+    </div>
+  </div>`;
+}
+
+function toggleRecipe(key) {
+  const i = state.openRecipes.indexOf(key);
+  if (i > -1) state.openRecipes.splice(i,1);
+  else state.openRecipes.push(key);
+  saveState();
+  renderMealPlan();
+}
+
+// ═══════════════════════════════════════════════════
+// STORE UNIT LOOKUP — 2025 retail prices (Sprouts base)
+//
+// cupsPerPkg   : how many recipe-cups fit in one package
+// countPerPkg  : for countable items, how many per package
+// tbspPerPkg   : for tbsp-measured items, tbsp per package
+// tspPerPkg    : for tsp-measured items, tsp per package
+// priceBase    : Sprouts price per package (store multipliers applied at render)
+// singleUse    : one package regardless of quantity (spices, condiments, oils)
+// ═══════════════════════════════════════════════════
+const STORE_UNITS = {
+  // ── PROTEINS ──
+  'Daring Original Shredded':
+    { label:'Daring Original Shredded (8 oz bag)', cupsPerPkg:2,    cat:'Protein',       priceBase:6.99 },
+  "Gardein Chick'n Strips":
+    { label:"Gardein Chick'n Strips (9 oz bag)",   cupsPerPkg:2.5,  cat:'Protein',       priceBase:5.49 },
+  'Gardein Classic Meatballs':
+    { label:'Gardein Classic Meatballs (12.7 oz)', cupsPerPkg:3,    cat:'Protein',       priceBase:5.99 },
+  'Firm tofu (non-GMO)':
+    { label:'Firm Tofu, Non-GMO (14 oz block)',    cupsPerPkg:2,    cat:'Protein',       priceBase:2.49 },
+
+  // ── PRODUCE ──
+  'Ripe avocado':
+    { label:'Avocado',                             countPerPkg:1,   cat:'Produce',       priceBase:1.29 },
+  'Avocado':
+    { label:'Avocado',                             countPerPkg:1,   cat:'Produce',       priceBase:1.29 },
+  'Ripe bananas':
+    { label:'Bananas (bunch ~5)',                  countPerPkg:5,   cat:'Produce',       priceBase:1.49 },
+  'Frozen banana':
+    { label:'Frozen Bananas (16 oz bag)',          cupsPerPkg:3,    cat:'Frozen',        priceBase:2.99 },
+  'Baby spinach':
+    { label:'Baby Spinach (5 oz bag)',             cupsPerPkg:5,    cat:'Produce',       priceBase:3.49 },
+  'Bell pepper, diced':
+    { label:'Bell Pepper',                         countPerPkg:1,   cat:'Produce',       priceBase:1.29 },
+  'Bell peppers (mixed colors), sliced':
+    { label:'Bell Peppers, Mixed (3-pack)',        countPerPkg:3,   cat:'Produce',       priceBase:3.99 },
+  'Red cabbage, shredded':
+    { label:'Red Cabbage (head)',                  cupsPerPkg:8,    cat:'Produce',       priceBase:2.99 },
+  'Garlic cloves, minced':
+    { label:'Garlic (head)',                       countPerPkg:10,  cat:'Produce',       priceBase:0.79 },
+  'Green onions':
+    { label:'Green Onions (bunch)',                countPerPkg:6,   cat:'Produce',       priceBase:0.99 },
+  'Medjool dates':
+    { label:'Medjool Dates (10 oz bag)',           countPerPkg:12,  cat:'Produce',       priceBase:5.99 },
+  'Lime':
+    { label:'Lime',                                countPerPkg:1,   cat:'Produce',       priceBase:0.59 },
+  'Sweet potato, cubed':
+    { label:'Sweet Potato',                        countPerPkg:1,   cat:'Produce',       priceBase:1.29 },
+  'Sweet potato':
+    { label:'Sweet Potato',                        countPerPkg:1,   cat:'Produce',       priceBase:1.29 },
+  'Kale, chopped':
+    { label:'Kale (bunch)',                        cupsPerPkg:8,    cat:'Produce',       priceBase:2.49 },
+  'Carrots, diced':
+    { label:'Carrots (1 lb bag)',                  countPerPkg:6,   cat:'Produce',       priceBase:1.49 },
+  'Shredded carrots':
+    { label:'Shredded Carrots (10 oz bag)',        cupsPerPkg:4,    cat:'Produce',       priceBase:1.99 },
+  'Red onion, sliced':
+    { label:'Red Onion',                           countPerPkg:1,   cat:'Produce',       priceBase:0.99 },
+  'Red onion, diced':
+    { label:'Red Onion',                           countPerPkg:1,   cat:'Produce',       priceBase:0.99 },
+  'Cucumber, julienned':
+    { label:'Cucumber',                            countPerPkg:1,   cat:'Produce',       priceBase:1.19 },
+  'Apple, peeled and diced':
+    { label:'Apple',                               countPerPkg:1,   cat:'Produce',       priceBase:0.99 },
+  'Cherry tomatoes, halved':
+    { label:'Cherry Tomatoes (pint)',              cupsPerPkg:2,    cat:'Produce',       priceBase:3.49 },
+  'Celery-free — use zucchini, diced':
+    { label:'Zucchini',                            countPerPkg:1,   cat:'Produce',       priceBase:0.99 },
+
+  // ── FROZEN ──
+  'Frozen mixed berries':
+    { label:'Frozen Mixed Berries (16 oz bag)',    cupsPerPkg:4,    cat:'Frozen',        priceBase:4.49 },
+  'Frozen mango chunks':
+    { label:'Frozen Mango Chunks (16 oz bag)',     cupsPerPkg:4,    cat:'Frozen',        priceBase:3.99 },
+  'Frozen corn':
+    { label:'Frozen Corn (12 oz bag)',             cupsPerPkg:3,    cat:'Frozen',        priceBase:1.99 },
+  'Frozen peas & carrots':
+    { label:'Frozen Peas & Carrots (12 oz bag)',   cupsPerPkg:3,    cat:'Frozen',        priceBase:1.99 },
+
+  // ── CANNED GOODS ──
+  'Canned coconut milk':
+    { label:'Coconut Milk, canned (13.5 oz)',      cupsPerPkg:1.7,  cat:'Canned Goods',  priceBase:2.49 },
+  'Canned diced tomatoes':
+    { label:'Diced Tomatoes, canned (14 oz)',      cupsPerPkg:1.75, cat:'Canned Goods',  priceBase:1.29 },
+  'Canned chickpeas':
+    { label:'Chickpeas, canned (15 oz)',           cupsPerPkg:1.5,  cat:'Canned Goods',  priceBase:1.49 },
+  'Canned black beans':
+    { label:'Black Beans, canned (15 oz)',         cupsPerPkg:1.5,  cat:'Canned Goods',  priceBase:1.29 },
+  'Canned cannellini beans':
+    { label:'White Beans, canned (15 oz)',         cupsPerPkg:1.5,  cat:'Canned Goods',  priceBase:1.49 },
+  'Canned white beans':
+    { label:'White Beans, canned (15 oz)',         cupsPerPkg:1.5,  cat:'Canned Goods',  priceBase:1.49 },
+  'Canned white beans, mashed':
+    { label:'White Beans, canned (15 oz)',         cupsPerPkg:1.5,  cat:'Canned Goods',  priceBase:1.49 },
+  'Canned black-eyed peas':
+    { label:'Black-Eyed Peas, canned (15 oz)',     cupsPerPkg:1.5,  cat:'Canned Goods',  priceBase:1.49 },
+
+  // ── DRY GOODS ──
+  'Rolled oats':
+    { label:'Rolled Oats (18 oz canister)',        cupsPerPkg:5,    cat:'Dry Goods',     priceBase:4.49 },
+  'Chia seeds':
+    { label:'Chia Seeds (12 oz bag)',              tbspPerPkg:24,   cat:'Dry Goods',     priceBase:5.99 },
+  'Ground flaxseed':
+    { label:'Ground Flaxseed (16 oz bag)',         tbspPerPkg:32,   cat:'Dry Goods',     priceBase:4.99 },
+  'Ground flaxseed':
+    { label:'Ground Flaxseed (16 oz bag)',         tbspPerPkg:32,   cat:'Dry Goods',     priceBase:4.99 },
+  'Hemp seeds':
+    { label:'Hemp Seeds (8 oz bag)',               tbspPerPkg:16,   cat:'Dry Goods',     priceBase:7.99 },
+  'Sunflower seeds':
+    { label:'Sunflower Seeds (8 oz bag)',          cupsPerPkg:2,    cat:'Dry Goods',     priceBase:3.49 },
+  'Coconut flakes (unsweetened)':
+    { label:'Coconut Flakes, unsweetened (7 oz)',  cupsPerPkg:3.5,  cat:'Dry Goods',     priceBase:3.99 },
+  'Vegan granola (tree nut-free)':
+    { label:'Vegan Granola, tree nut-free (12 oz)',cupsPerPkg:4,    cat:'Dry Goods',     priceBase:5.99 },
+  'Red lentils, dry':
+    { label:'Red Lentils (16 oz bag)',             cupsPerPkg:3,    cat:'Dry Goods',     priceBase:2.49 },
+  'Green lentils, dry':
+    { label:'Green Lentils (16 oz bag)',           cupsPerPkg:3,    cat:'Dry Goods',     priceBase:2.49 },
+  'Brown rice':
+    { label:'Brown Rice (2 lb bag)',               cupsPerPkg:8,    cat:'Dry Goods',     priceBase:3.49 },
+  'Brown rice (day-old cooked)':
+    { label:'Brown Rice (2 lb bag)',               cupsPerPkg:8,    cat:'Dry Goods',     priceBase:3.49 },
+  'Pasta (rice or chickpea-based)':
+    { label:'Pasta, rice or chickpea (12 oz box)', cupsPerPkg:4,   cat:'Dry Goods',     priceBase:3.99 },
+  'Rice paper wrappers':
+    { label:'Rice Paper Wrappers (12 oz pack)',    countPerPkg:20,  cat:'Dry Goods',     priceBase:3.99 },
+  'Nutritional yeast':
+    { label:'Nutritional Yeast (8 oz bag)',        tbspPerPkg:30,   cat:'Dry Goods',     priceBase:6.99, singleUse:true },
+
+  // ── DAIRY-FREE MILK ──
+  'Oat milk':
+    { label:'Oat Milk (half-gallon carton)',       cupsPerPkg:8,    cat:'Dairy-Free',    priceBase:4.99 },
+  'Vegan coconut yogurt (plain)':
+    { label:'Coconut Yogurt, plain (24 oz)',       cupsPerPkg:3,    cat:'Dairy-Free',    priceBase:5.49 },
+
+  // ── BREAD & BAKERY ──
+  'Vegan whole-grain bread':
+    { label:'Whole-Grain Bread, vegan (loaf)',     countPerPkg:18,  cat:'Bread & Bakery',priceBase:4.99 },
+  'Corn tortillas (6-inch)':
+    { label:'Corn Tortillas 6-inch (30 ct pack)',  countPerPkg:30,  cat:'Bread & Bakery',priceBase:3.49 },
+  'Vegan slider rolls':
+    { label:'Slider Rolls, vegan (12 ct pack)',    countPerPkg:12,  cat:'Bread & Bakery',priceBase:4.49 },
+
+  // ── PANTRY ──
+  'Maple syrup':
+    { label:'Maple Syrup (12 oz bottle)',          singleUse:true,  cat:'Pantry',        priceBase:7.99 },
+  'Maple syrup (topping)':
+    { label:'Maple Syrup (12 oz bottle)',          singleUse:true,  cat:'Pantry',        priceBase:7.99 },
+  'Sunflower seed butter':
+    { label:'Sunflower Seed Butter (16 oz jar)',   singleUse:true,  cat:'Pantry',        priceBase:7.49 },
+  'Salsa (jar)':
+    { label:'Salsa (16 oz jar)',                   cupsPerPkg:2,    cat:'Pantry',        priceBase:3.99 },
+  'Vegan BBQ sauce':
+    { label:'BBQ Sauce, vegan (18 oz bottle)',     cupsPerPkg:2.25, cat:'Pantry',        priceBase:3.49 },
+  'Vegan marinara sauce (jar)':
+    { label:'Marinara Sauce (24 oz jar)',          cupsPerPkg:3,    cat:'Pantry',        priceBase:4.49 },
+  'Low-sodium tamari':
+    { label:'Tamari, low-sodium (10 oz bottle)',   singleUse:true,  cat:'Pantry',        priceBase:4.99 },
+  'Low-sodium vegetable broth':
+    { label:'Vegetable Broth, low-sodium (32 oz)',cupsPerPkg:4,    cat:'Pantry',        priceBase:2.99 },
+  'Apple cider vinegar':
+    { label:'Apple Cider Vinegar (16 oz bottle)',  singleUse:true,  cat:'Pantry',        priceBase:3.49 },
+  'Dill pickles, sliced':
+    { label:'Dill Pickles (16 oz jar)',            singleUse:true,  cat:'Pantry',        priceBase:3.49 },
+
+  // ── OILS ──
+  'Olive oil':
+    { label:'Olive Oil (16 oz bottle)',            singleUse:true,  cat:'Oils',          priceBase:7.99 },
+  'Sesame oil':
+    { label:'Sesame Oil (7 oz bottle)',            singleUse:true,  cat:'Oils',          priceBase:4.99 },
+
+  // ── SPICES (one jar regardless of quantity) ──
+  'Cinnamon':          { label:'Cinnamon (jar)',          singleUse:true, cat:'Spices', priceBase:3.49 },
+  'Cumin':             { label:'Cumin (jar)',              singleUse:true, cat:'Spices', priceBase:3.49 },
+  'Turmeric':          { label:'Turmeric (jar)',           singleUse:true, cat:'Spices', priceBase:3.49 },
+  'Ground turmeric':   { label:'Turmeric (jar)',           singleUse:true, cat:'Spices', priceBase:3.49 },
+  'Curry powder':      { label:'Curry Powder (jar)',       singleUse:true, cat:'Spices', priceBase:3.99 },
+  'Garam masala':      { label:'Garam Masala (jar)',       singleUse:true, cat:'Spices', priceBase:3.99 },
+  'Smoked paprika':    { label:'Smoked Paprika (jar)',     singleUse:true, cat:'Spices', priceBase:3.49 },
+  'Garlic powder':     { label:'Garlic Powder (jar)',      singleUse:true, cat:'Spices', priceBase:3.49 },
+  'Italian seasoning': { label:'Italian Seasoning (jar)', singleUse:true, cat:'Spices', priceBase:3.49 },
+  'Ground ginger':     { label:'Ground Ginger (jar)',      singleUse:true, cat:'Spices', priceBase:3.49 },
+  'Red pepper flakes': { label:'Red Pepper Flakes (jar)', singleUse:true, cat:'Spices', priceBase:2.99 },
+  'Vanilla extract':   { label:'Vanilla Extract (4 oz)',  singleUse:true, cat:'Spices', priceBase:5.99 },
+  'Sea salt':          { label:'Sea Salt (container)',     singleUse:true, cat:'Spices', priceBase:2.99 },
+};
+
+// ── RENDER: SHOPPING LIST ─────────────────────────
+function buildShopItems() {
+  const days = getDayList();
+
+  // Step 1: Accumulate total recipe quantities per ingredient across all days × people
+  // ppd (per-person-per-day) × people × days gives total recipe quantity needed
+  const rawTotals = {};
+
+  days.forEach((d, idx) => {
+    const addIng = (ingredients) => {
+      ingredients.forEach(ing => {
+        const k = ing.item;
+        if (!rawTotals[k]) rawTotals[k] = {
+          item: ing.item, cat: ing.cat, spice: !!ing.spice,
+          unit: ing.unit,  // 'cup', 'tbsp', 'tsp', or null (count)
+          total: 0
+        };
+        rawTotals[k].total += (ing.ppd || 0) * state.people;
+      });
+    };
+    if (state.meals.breakfast) addIng(getMeal('breakfast', idx).ingredients);
+    if (state.meals.dinner)    addIng(getMeal('dinner', idx).ingredients);
+  });
+
+  // Step 2: Convert recipe totals → minimum store packages needed + price
+  const storeMult = STORE_MULTI[state.store];
+  const shopItems = {};
+
+  Object.values(rawTotals).forEach(raw => {
+    const lu = STORE_UNITS[raw.item];
+    let pkgs = 1;
+    let label, cat, priceEach;
+
+    if (lu) {
+      label     = lu.label;
+      cat       = lu.cat;
+      priceEach = +(lu.priceBase * storeMult).toFixed(2);
+
+      if (lu.singleUse || raw.spice) {
+        pkgs = 1;
+      } else if (lu.cupsPerPkg && raw.unit === 'cup') {
+        pkgs = Math.max(1, Math.ceil(raw.total / lu.cupsPerPkg));
+      } else if (lu.tbspPerPkg && raw.unit === 'tbsp') {
+        pkgs = Math.max(1, Math.ceil(raw.total / lu.tbspPerPkg));
+      } else if (lu.tspPerPkg && raw.unit === 'tsp') {
+        pkgs = Math.max(1, Math.ceil(raw.total / lu.tspPerPkg));
+      } else if (lu.countPerPkg) {
+        // count-based: total is # of individual items needed
+        pkgs = Math.max(1, Math.ceil(raw.total / lu.countPerPkg));
+      } else {
+        pkgs = 1;
+      }
+    } else {
+      // Fallback: item not in lookup
+      label     = raw.item;
+      cat       = raw.cat;
+      priceEach = 2.50; // generic fallback price
+      pkgs      = raw.spice ? 1 : Math.max(1, Math.ceil(raw.total));
+    }
+
+    const totalPrice = +(pkgs * priceEach).toFixed(2);
+
+    // Dedupe by label (same package used by multiple ingredients)
+    if (!shopItems[label]) {
+      shopItems[label] = { item: raw.item, label, pkgs, priceEach, totalPrice, cat };
+    } else {
+      // Already exists — take the max pkgs needed and recalculate price
+      if (pkgs > shopItems[label].pkgs) {
+        shopItems[label].pkgs       = pkgs;
+        shopItems[label].totalPrice = +(pkgs * shopItems[label].priceEach).toFixed(2);
+      }
+    }
+  });
+
+  return shopItems;
+}
+
+function fmtCup(n) {
+  if (n >= 4) return Math.ceil(n).toString();
+  if (n >= 2) return (Math.round(n*2)/2).toString();
+  const q = Math.ceil(n*4)/4;
+  const w = Math.floor(q), f = q-w;
+  const fs = f===0.25?'¼':f===0.5?'½':f===0.75?'¾':'';
+  return ((w>0?w:'')+fs)||'¼';
+}
+
+function calcRealTotal() {
+  const shopMap = buildShopItems();
+  const needed  = Object.values(shopMap).filter(i => !state.checkedItems.includes(i.label));
+  return needed.reduce((sum, i) => sum + i.totalPrice, 0);
+}
+
+function renderShoppingList() {
+  const container = document.getElementById('shopList');
+  const days = getDayList();
+  if (days.length === 0) {
+    container.innerHTML = '<div class="shop-empty">Select your plan above to see your shopping list.</div>';
+    return;
+  }
+  const shopMap  = buildShopItems();
+  const allItems = Object.values(shopMap);
+  const needed   = allItems.filter(i => !state.checkedItems.includes(i.label));
+  const haveIt   = allItems.filter(i =>  state.checkedItems.includes(i.label));
+
+  const catOrder = ['Protein','Produce','Frozen','Canned Goods','Dry Goods','Dairy-Free','Bread & Bakery','Pantry','Oils','Spices'];
+
+  const byCat = {};
+  needed.forEach(i => {
+    if (!byCat[i.cat]) byCat[i.cat] = [];
+    byCat[i.cat].push(i);
+  });
+  const cats = Object.keys(byCat).sort((a,b)=>{
+    const ai=catOrder.indexOf(a), bi=catOrder.indexOf(b);
+    return (ai<0?99:ai)-(bi<0?99:bi);
+  });
+
+  const needTotal = needed.reduce((s,i)=>s+i.totalPrice,0);
+  const haveTotal = haveIt.reduce((s,i)=>s+i.totalPrice,0);
+  const grandTotal = allItems.reduce((s,i)=>s+i.totalPrice,0);
+
+  let html = `<div class="shop-counter">
+    <span>Need to buy: <strong>${needed.length} of ${allItems.length} items</strong> · <strong>$${needTotal.toFixed(2)}</strong></span>
+    <button class="shop-reset-btn" onclick="resetChecked()">Reset all</button>
+  </div>`;
+
+  if (cats.length === 0) {
+    html += `<div class="shop-empty">🎉 Everything's already checked off!</div>`;
+  } else {
+    cats.forEach(cat => {
+      html += `<div class="shop-category"><div class="shop-cat-title">${cat}</div>`;
+      byCat[cat].forEach(i => {
+        const safeKey  = i.label.replace(/'/g,"\\'");
+        const pkgLabel = i.pkgs > 1 ? `${i.pkgs}×` : '';
+        html += `<div class="shop-item" onclick="toggleItem('${safeKey}')">
+          <div class="shop-check"></div>
+          <span class="shop-item-name">${pkgLabel ? pkgLabel + ' ' : ''}${i.label}</span>
+          <span class="shop-item-qty">$${i.totalPrice.toFixed(2)}</span>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+  }
+
+  if (haveIt.length > 0) {
+    html += `<div class="already-have-section"><div class="already-title">✓ Already have (${haveIt.length}) — saving $${haveTotal.toFixed(2)}</div>`;
+    haveIt.forEach(i => {
+      const safeKey = i.label.replace(/'/g,"\\'");
+      html += `<div class="shop-item have" onclick="toggleItem('${safeKey}')">
+        <div class="shop-check">✓</div>
+        <span class="shop-item-name">${i.label}</span>
+        <span class="shop-item-qty">$${i.totalPrice.toFixed(2)}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function toggleItem(label) {
+  const i = state.checkedItems.indexOf(label);
+  if (i > -1) state.checkedItems.splice(i, 1);
+  else state.checkedItems.push(label);
+  saveState();
+  renderShoppingList();
+  renderBudget();
+}
+
+function resetChecked() {
+  state.checkedItems = [];
+  saveState();
+  renderShoppingList();
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER: BUDGET
+// ═══════════════════════════════════════════════════
+const BASE_LOW  = 38;  // kept only for bar fallback when no plan selected
+const BASE_HIGH = 52;
+
+function renderBudget() {
+  const nd = totalDays(), p = state.people, meals = activeMealCount();
+
+  let totalCost = 0, savedCost = 0;
+  let displayRange = '—';
+  let perPerson = '—';
+  let bkdHTML = '';
+
+  if (nd > 0) {
+    const shopMap  = buildShopItems();
+    const allItems = Object.values(shopMap);
+    totalCost = allItems.reduce((s,i)=>s+i.totalPrice, 0);
+    savedCost = allItems.filter(i=>state.checkedItems.includes(i.label)).reduce((s,i)=>s+i.totalPrice,0);
+    const toPay  = totalCost - savedCost;
+
+    displayRange = `$${toPay.toFixed(2)}`;
+    if (savedCost > 0) displayRange += ` <span style="font-size:18px;color:rgba(255,255,255,0.5)">($${savedCost.toFixed(2)} saved)</span>`;
+    perPerson = `$${(toPay/p).toFixed(2)} per person`;
+
+    const storeName = STORE_LABEL[state.store];
+    bkdHTML = `
+      <div class="budget-row"><span>Total list (${allItems.length} items)</span><span>$${totalCost.toFixed(2)}</span></div>
+      <div class="budget-row"><span>Already have (checked off)</span><span>−$${savedCost.toFixed(2)}</span></div>
+      <div class="budget-row" style="border-top:1px solid rgba(255,255,255,0.15);padding-top:8px;margin-top:4px;">
+        <span>You need to spend</span><span style="color:var(--green-bright);font-size:16px;">$${toPay.toFixed(2)}</span>
+      </div>
+      <div class="budget-row" style="margin-top:4px;font-size:11px;color:rgba(255,255,255,0.4);">
+        <span>Prices reflect ${storeName} estimates</span><span>${nd} days · ${p} people</span>
+      </div>`;
+  }
+
+  document.getElementById('budgetRange').innerHTML   = displayRange;
+  document.getElementById('budgetContext').textContent = nd===0 ? 'Select your plan to see real costs' :
+    `${nd} days · ${p} ${p===1?'person':'people'} · ${meals} meal${meals!==1?'s':''}/day`;
+  document.getElementById('budgetPerPerson').textContent = nd===0 ? '' : perPerson;
+  document.getElementById('budgetBreakdown').innerHTML   = bkdHTML;
+
+  // Sticky bar
+  const toPay = nd > 0 ? totalCost - savedCost : 0;
+  document.getElementById('barDays').textContent    = nd + ' day' + (nd!==1?'s':'');
+  document.getElementById('barMeals').textContent   = meals===3 ? 'all meals' :
+    ['breakfast','lunch','dinner'].filter(k=>state.meals[k]).join(' + ');
+  document.getElementById('barPeople').textContent  = p;
+  document.getElementById('barCost').textContent    = nd===0 ? '$—' : `$${toPay.toFixed(2)}`;
+
+  // Budget bar
+  renderBudgetBar(toPay, toPay * 0.95, toPay * 1.05);
+}
+
+function renderBudgetBar(midEst, low, high) {
+  const goal = state.budgetGoal;
+  const barWrap  = document.getElementById('budgetBarWrap');
+  const fill     = document.getElementById('budgetBarFill');
+  const verdict  = document.getElementById('budgetVerdict');
+  const estLabel = document.getElementById('barEstLabel');
+  const goalLabel= document.getElementById('barGoalLabel');
+
+  // Always show the bar wrap once a goal is set
+  if (!goal || goal <= 0) {
+    barWrap.style.display = 'none';
+    return;
+  }
+  barWrap.style.display = 'block';
+
+  const nd = totalDays();
+  estLabel.textContent  = nd > 0 ? `Est. $${low.toFixed(0)}–$${high.toFixed(0)}` : 'Est. —';
+  goalLabel.textContent = `Goal $${goal}`;
+
+  if (nd === 0) {
+    fill.style.width = '0%';
+    fill.className = 'budget-bar-fill bar-green';
+    verdict.className = 'budget-verdict verdict-none';
+    verdict.textContent = 'Select your plan above to see how you\'re tracking.';
+    return;
+  }
+
+  const pct  = Math.min((midEst / goal) * 100, 115); // cap visual at 115%
+  const pctDisplay = Math.min(pct, 100);
+  fill.style.width = pctDisplay.toFixed(1) + '%';
+
+  const diff = goal - midEst;
+  if (midEst <= goal * 0.80) {
+    fill.className = 'budget-bar-fill bar-green';
+    verdict.className = 'budget-verdict verdict-green';
+    verdict.textContent = `✅ You're ~$${Math.abs(diff).toFixed(0)} under budget. You're good!`;
+  } else if (midEst <= goal) {
+    fill.className = 'budget-bar-fill bar-yellow';
+    verdict.className = 'budget-verdict verdict-yellow';
+    verdict.textContent = `⚠️ Close to your limit — about $${Math.abs(diff).toFixed(0)} left.`;
+  } else {
+    const over = midEst - goal;
+    fill.className = 'budget-bar-fill bar-red';
+    verdict.className = 'budget-verdict verdict-red';
+    verdict.textContent = `❌ Est. $${over.toFixed(0)} over budget. Try Aldi, fewer days, or check off pantry items you already have.`;
+  }
+}
+
+function onBudgetInput() {
+  const val = parseFloat(document.getElementById('budgetGoal').value) || 0;
+  state.budgetGoal = val;
+  saveState();
+  renderBudget();
+}
+
+// ═══════════════════════════════════════════════════
+// SYNC UI FROM STATE (called after loadState)
+// ═══════════════════════════════════════════════════
+function syncUI() {
+  document.getElementById('peopleCount').textContent = state.people;
+
+  const dayChips = document.querySelectorAll('.day-chip');
+  dayChips.forEach((el,i)=> el.classList.toggle('active', state.activeDays.includes(i+1)));
+
+  document.querySelectorAll('.plan-chip').forEach(el => {
+    el.classList.toggle('active', parseInt(el.textContent) === state.planDays);
+  });
+
+  ['breakfast','lunch','dinner'].forEach(m => {
+    document.getElementById('toggle-'+m).classList.toggle('active', state.meals[m]);
+  });
+  document.getElementById('lunchNote').style.display = state.meals.lunch ? '' : 'none';
+
+  document.querySelectorAll('.store-btn').forEach(el => el.classList.remove('active'));
+  const sb = document.getElementById('store-'+state.store);
+  if (sb) sb.classList.add('active');
+
+  document.getElementById('weekNum').textContent = state.week;
+  document.getElementById('weekLabel').textContent = 'Week ' + state.week;
+  if (state.budgetGoal) document.getElementById('budgetGoal').value = state.budgetGoal;
+}
+
+// ═══════════════════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════════════════
+function changePeople(delta) {
+  state.people = Math.max(1, Math.min(12, state.people + delta));
+  document.getElementById('peopleCount').textContent = state.people;
+  saveState(); refreshAll();
+}
+
+function toggleDay(d) {
+  state.planDays = 0;
+  document.querySelectorAll('.plan-chip').forEach(el => el.classList.remove('active'));
+  const chips = document.querySelectorAll('.day-chip');
+  const idx = state.activeDays.indexOf(d);
+  if (idx > -1) { state.activeDays.splice(idx,1); chips[d-1].classList.remove('active'); }
+  else          { state.activeDays.push(d);        chips[d-1].classList.add('active'); }
+  state.openRecipes = [];
+  state.checkedItems = [];
+  saveState(); refreshAll();
+}
+
+function selectPlan(days) {
+  state.planDays = days;
+  state.activeDays = [];
+  document.querySelectorAll('.day-chip').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.plan-chip').forEach(el => {
+    el.classList.toggle('active', parseInt(el.textContent) === days);
+  });
+  state.openRecipes = [];
+  state.checkedItems = [];
+  saveState(); refreshAll();
+}
+
+function toggleMeal(type) {
+  state.meals[type] = !state.meals[type];
+  document.getElementById('toggle-'+type).classList.toggle('active', state.meals[type]);
+  document.getElementById('lunchNote').style.display = state.meals.lunch ? '' : 'none';
+  state.openRecipes = [];
+  state.checkedItems = [];
+  saveState(); refreshAll();
+}
+
+function selectStore(store) {
+  state.store = store;
+  document.querySelectorAll('.store-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('store-'+store).classList.add('active');
+  saveState(); refreshAll();
+}
+
+function changeWeek(delta) {
+  state.week = Math.max(1, Math.min(4, state.week + delta));
+  document.getElementById('weekNum').textContent = state.week;
+  document.getElementById('weekLabel').textContent = 'Week ' + state.week;
+  state.openRecipes = [];
+  state.checkedItems = [];
+  saveState(); refreshAll();
+}
+
+function switchTab(tab) {
+  const names = ['plan','shop','budget'];
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', names[i]===tab));
+  document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+function copyShop() {
+  const shopMap = buildShopItems();
+  const needed  = Object.values(shopMap).filter(i => !state.checkedItems.includes(i.label));
+  if (needed.length === 0) { alert('Nothing left to buy — everything is checked off!'); return; }
+  const catOrder = ['Protein','Produce','Frozen','Canned Goods','Dry Goods','Dairy-Free','Bread & Bakery','Pantry','Oils','Spices'];
+  const byCat = {};
+  needed.forEach(i => { if (!byCat[i.cat]) byCat[i.cat]=[]; byCat[i.cat].push(i); });
+  const cats = Object.keys(byCat).sort((a,b)=>(catOrder.indexOf(a)<0?99:catOrder.indexOf(a))-(catOrder.indexOf(b)<0?99:catOrder.indexOf(b)));
+  const total = needed.reduce((s,i)=>s+i.totalPrice,0);
+  const lines = ['PlantTable — Shopping List', `Store: ${STORE_LABEL[state.store]}`, ''];
+  cats.forEach(cat => {
+    lines.push('── ' + cat.toUpperCase() + ' ──');
+    byCat[cat].forEach(i => {
+      const pkgLabel = i.pkgs > 1 ? `${i.pkgs}× ` : '';
+      lines.push(`  ☐ ${pkgLabel}${i.label}  $${i.totalPrice.toFixed(2)}`);
+    });
+    lines.push('');
+  });
+  lines.push(`TOTAL TO SPEND: $${total.toFixed(2)}`);
+  navigator.clipboard.writeText(lines.join('\n'))
+    .then(()=>alert('✅ Shopping list copied!'))
+    .catch(()=>alert('Copy failed — select and copy manually.'));
+}
+
+function refreshAll() {
+  renderMealPlan();
+  renderShoppingList();
+  renderBudget();
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+loadState();
+syncUI();
+refreshAll();
+</script>
+</body>
+</html>
